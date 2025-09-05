@@ -83,6 +83,9 @@ Adicione as linhas abaixo ao final do arquivo:
 
 O script será executado automaticamente a cada minuto e ao iniciar o sistema.
 
+Pode usar esse comando para acompanhar a alteração das variaveis
+`watch -n 2 sudo ryzenadj -i`
+
 ---
 
 **Observação:**  
