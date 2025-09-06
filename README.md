@@ -7,6 +7,15 @@ Este repositório contém dois scripts para otimizar o gerenciamento de energia 
 
 ## Scripts Disponíveis
 
+---
+
+## Resumo dos scripts
+
+- **script-ryzen-adj.sh**: Otimiza os limites de energia do RyzenAdj automaticamente conforme o perfil e estado da bateria.
+- **auto-power-brightness.sh**: Alterna entre perfis Performance/Battery do system76-power e ajusta brilho do display conforme o estado da bateria, exibindo logs.
+
+---
+
 ### 1. script-ryzen-adj.sh
 
 Ajusta os limites do RyzenAdj automaticamente de acordo com:
@@ -157,13 +166,16 @@ fi
 sudo chmod +x /usr/local/bin/auto-power-brightness.sh
 ```
 
-**4. Configure para executar automaticamente conforme desejar (por exemplo, via crontab ou systemd).**
+**4. Configure para executar automaticamente:**
+Edite o crontab do root:
+```bash
+sudo crontab -e
+```
+Adicione ao final:
+```
+@reboot /usr/local/bin/auto-power-brightness.sh
+* * * * * /usr/local/bin/auto-power-brightness.sh
+```
 
----
-
-## Resumo dos scripts
-
-- **script-ryzen-adj.sh**: Otimiza os limites de energia do RyzenAdj automaticamente conforme o perfil e estado da bateria.
-- **auto-power-brightness.sh**: Alterna entre perfis Performance/Battery do system76-power e ajusta brilho do display conforme o estado da bateria, exibindo logs.
-
----
+**5. Pronto!**  
+O script será executado automaticamente a cada minuto e ao iniciar o sistema.
