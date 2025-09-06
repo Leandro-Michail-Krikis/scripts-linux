@@ -3,7 +3,7 @@
 Este repositório contém dois scripts para otimizar o gerenciamento de energia e desempenho em notebooks System76 com Ubuntu 24+:
 
 - **script-ryzen-adj.sh**: Ajusta automaticamente os limites de energia do RyzenAdj conforme o perfil de energia e estado da bateria.
-- **auto-power-brightness.sh**: Alterna o perfil do `system76-power` entre Performance/Battery e ajusta o brilho automaticamente, mantendo o valor do brilho e mostrando logs no terminal.
+- **auto-power-brightness.sh**: Alterna o perfil do `system76-power` entre Performance/Battery e ajusta o brilho automaticamente, mantendo o valor do brilho e mostrando logs no terminal. Quando esta no balanced o perfil não é ajustado
 
 ## Scripts Disponíveis
 
