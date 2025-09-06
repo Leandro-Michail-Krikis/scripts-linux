@@ -1,21 +1,35 @@
-# RyzenAdj Auto Profile Script
+# RyzenAdj Auto Profile Script & System76 Power/Brightness Auto Switch
 
-Este script ajusta automaticamente os limites de energia do RyzenAdj conforme o perfil de energia e estado da bateria do seu computador System76 (Ubuntu 24+).
+Este repositório contém dois scripts para otimizar o gerenciamento de energia e desempenho em notebooks System76 com Ubuntu 24+:
 
-## Passo a Passo de Instalação e Uso
+- **script-ryzen-adj.sh**: Ajusta automaticamente os limites de energia do RyzenAdj conforme o perfil de energia e estado da bateria.
+- **auto-power-brightness.sh**: Alterna o perfil do `system76-power` entre Performance/Battery e ajusta o brilho automaticamente, mantendo o valor do brilho e mostrando logs no terminal.
 
-### 1. Instale o RyzenAdj e configure para não precisar senha ao executar lo com sudo
+## Scripts Disponíveis
 
-### 2. Salve o Script
+### 1. script-ryzen-adj.sh
 
-Crie o arquivo do script:
+Ajusta os limites do RyzenAdj automaticamente de acordo com:
+- Perfil de energia (`system76-power profile`)
+- Estado da bateria (carregando/descarregando)
+- Executa comandos do `ryzenadj` conforme o contexto para otimizar consumo ou desempenho
 
+#### Principais flags usadas no RyzenAdj
+
+- `--fast-limit`: Define o limite máximo (em mW) para picos rápidos de consumo de energia pela CPU (boost).
+- `--apu-slow-limit`: Define o limite de energia (em mW) para o uso sustentado do APU (CPU+GPU integrado) durante cargas prolongadas.
+- `--slow-limit`: Limite global de energia sustentada (em mW) para o sistema.
+- `--tctl-temp`: Define a temperatura máxima permitida para o sensor Tctl da CPU (em °C). O RyzenAdj limitará a potência para não ultrapassar esse valor.
+
+#### Instalação e Uso
+
+**1. Instale o RyzenAdj e configure o sudo para não pedir senha ao executar o comando.**
+
+**2. Crie o arquivo do script:**
 ```bash
 sudo nano /usr/local/bin/script-ryzen-adj.sh
 ```
-
-Cole o conteúdo abaixo e salve:
-
+**3. Cole o conteúdo abaixo e salve:**
 ```bash
 unplugged_battery="ryzenadj --tctl-temp=85 --apu-skin-temp=60 --dgpu-skin-temp=60 --fast-limit=15000 --apu-slow-limit=5000 --slow-limit=5000 --power-saving"
 unplugged_balanced="ryzenadj --tctl-temp=85 --apu-skin-temp=60 --dgpu-skin-temp=60 --fast-limit=25000 --apu-slow-limit=15000 --slow-limit=15000 --power-saving"
@@ -26,11 +40,9 @@ plugged_balanced="ryzenadj --tctl-temp=85 --apu-skin-temp=60 --dgpu-skin-temp=60
 plugged_performance="ryzenadj --tctl-temp=85 --apu-skin-temp=60 --dgpu-skin-temp=60 --fast-limit=75000 --apu-slow-limit=65000 --slow-limit=65000 --max-performance"
 
 battery_state=$(upower -i $(upower -e | grep BAT) | grep -E "state" | awk '{print $2}')
-
 current_profile=$(system76-power profile | grep "Power Profile" | awk '{print $3}')
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Estado bateria: $battery_state"
-
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Perfil: $current_profile"
 
 if [ "$battery_state" = "discharging" ]; then
@@ -58,36 +70,100 @@ else
 fi
 ```
 
-### 3. Dê permissão de execução
-
+**4. Dê permissão de execução:**
 ```bash
 sudo chmod +x /usr/local/bin/script-ryzen-adj.sh
 ```
 
-### 4. Configure para executar automaticamente
-
+**5. Configure para executar automaticamente:**
 Edite o crontab do root:
-
 ```bash
 sudo crontab -e
 ```
-
-Adicione as linhas abaixo ao final do arquivo:
-
+Adicione ao final:
 ```
 @reboot /usr/local/bin/script-ryzen-adj.sh
 * * * * * /usr/local/bin/script-ryzen-adj.sh
 ```
 
-### 5. Pronto!
-
+**6. Pronto!**  
 O script será executado automaticamente a cada minuto e ao iniciar o sistema.
 
-Pode usar esse comando para acompanhar a alteração das variaveis
-`watch -n 2 sudo ryzenadj -i`
+Para monitorar:
+```bash
+watch -n 2 sudo ryzenadj -i
+```
+
+> **Observação:**  
+O script requer permissões de superusuário para executar o `ryzenadj`.  
+Certifique-se de configurar o sudoers para não pedir senha.
 
 ---
 
-**Observação:**  
-O script requer permissões de superusuário para executar o `ryzenadj`.  
-Certifique-se de que o usuário root tem permissão para rodar o comando sem senha, ou configure o sudoers conforme necessário.
+### 2. auto-power-brightness.sh
+
+Alterna automaticamente o perfil de energia do `system76-power` entre **Performance** e **Battery**, mantendo o valor de brilho do display (limitando a 80% na bateria) e exibindo logs detalhados no terminal.
+
+#### Instalação e Uso
+
+**1. Crie o arquivo do script:**
+```bash
+sudo nano /usr/local/bin/auto-power-brightness.sh
+```
+
+**2. Cole o conteúdo abaixo e salve:**
+```bash
+#!/bin/bash
+# Ajusta o profile system76-power mantendo brilho e mostrando logs no terminal
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Iniciando script"
+
+# Pega o estado da bateria
+battery_state=$(upower -i $(upower -e | grep BAT) | grep -E "state" | awk '{print $2}')
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Estado da bateria: $battery_state"
+
+# Pega o profile atual
+current_profile=$(system76-power profile | grep "Power Profile" | awk '{print $3}')
+
+# Pega o brilho atual
+current_brightness=$(system76-power profile | grep "Backlight" | awk -F'=' '{print $2}' | awk '{print $1}' | tr -d '%')
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Perfil atual: $current_profile, Brilho atual: $current_brightness"
+
+if [ "$battery_state" = "discharging" ]; then
+    if [ "$current_profile" = "Performance" ]; then
+        system76-power profile battery
+        if [ "$current_brightness" -gt 80 ]; then
+            current_brightness=80
+        fi
+        sudo brightnessctl set ${current_brightness}%
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Mudou para Battery com brilho $current_brightness%"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Já está no Battery"
+    fi
+else
+    if [ "$current_profile" = "Battery" ]; then
+        system76-power profile performance
+        sudo brightnessctl set ${current_brightness}%
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Mudou para Performance com brilho $current_brightness%"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Já está no Performance"
+    fi
+fi
+```
+
+**3. Dê permissão de execução:**
+```bash
+sudo chmod +x /usr/local/bin/auto-power-brightness.sh
+```
+
+**4. Configure para executar automaticamente conforme desejar (por exemplo, via crontab ou systemd).**
+
+---
+
+## Resumo dos scripts
+
+- **script-ryzen-adj.sh**: Otimiza os limites de energia do RyzenAdj automaticamente conforme o perfil e estado da bateria.
+- **auto-power-brightness.sh**: Alterna entre perfis Performance/Battery do system76-power e ajusta brilho do display conforme o estado da bateria, exibindo logs.
+
+---
