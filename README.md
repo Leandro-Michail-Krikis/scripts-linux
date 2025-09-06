@@ -16,10 +16,10 @@ Ajusta os limites do RyzenAdj automaticamente de acordo com:
 
 #### Principais flags usadas no RyzenAdj
 
-- `--fast-limit`: Define o limite máximo (em mW) para picos rápidos de consumo de energia pela CPU (boost).
-- `--apu-slow-limit`: Define o limite de energia (em mW) para o uso sustentado do APU (CPU+GPU integrado) durante cargas prolongadas.
-- `--slow-limit`: Limite global de energia sustentada (em mW) para o sistema.
-- `--tctl-temp`: Define a temperatura máxima permitida para o sensor Tctl da CPU (em °C). O RyzenAdj limitará a potência para não ultrapassar esse valor.
+- `--fast-limit`: Consumo de boost da cpu
+- `--apu-slow-limit`: Consumo continuo maximo da cpu.
+- `--slow-limit`: Consumo continuo maximo da cpu.
+- `--tctl-temp`: Define a temperatura onde vai começar o throtling.
 
 #### Instalação e Uso
 
