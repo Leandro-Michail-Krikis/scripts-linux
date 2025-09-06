@@ -3,7 +3,7 @@
 Este repositório contém dois scripts para otimizar o gerenciamento de energia e desempenho em notebooks System76 com Ubuntu 24+:
 
 - **script-ryzen-adj.sh**: Ajusta automaticamente os limites de energia do RyzenAdj conforme o perfil de energia e estado da bateria.
-- **auto-power-brightness.sh**: Alterna o perfil do `system76-power` entre Performance/Battery e ajusta o brilho automaticamente, mantendo o valor do brilho e mostrando logs no terminal. Quando esta no balanced o perfil não é ajustado
+- **auto-power-brightness.sh**: Alterna o perfil do `system76-power` entre Performance/Battery e ajusta o brilho automaticamente, mantendo o valor do brilho e mostrando logs no terminal. Quando esta n[...]
 
 ## Scripts Disponíveis
 
@@ -98,20 +98,11 @@ Adicione ao final:
 **6. Pronto!**  
 O script será executado automaticamente a cada minuto e ao iniciar o sistema.
 
-Para monitorar:
-```bash
-watch -n 2 sudo ryzenadj -i
-```
-
-> **Observação:**  
-O script requer permissões de superusuário para executar o `ryzenadj`.  
-Certifique-se de configurar o sudoers para não pedir senha.
-
 ---
 
 ### 2. auto-power-brightness.sh
 
-Alterna automaticamente o perfil de energia do `system76-power` entre **Performance** e **Battery**, mantendo o valor de brilho do display (limitando a 80% na bateria) e exibindo logs detalhados no terminal.
+Alterna automaticamente o perfil de energia do `system76-power` entre **Performance** e **Battery**, mantendo o valor de brilho do display (limitando a 80% na bateria) e exibindo logs detalhados no te[...]
 
 #### Instalação e Uso
 
@@ -179,3 +170,32 @@ Adicione ao final:
 
 **5. Pronto!**  
 O script será executado automaticamente a cada minuto e ao iniciar o sistema.
+
+---
+
+## Para Monitorar
+
+Para observar o consumo de watts e testar o comportamento dos perfis sob carga, utilize os comandos abaixo:
+
+**1. Monitorar consumo com ryzenadj:**
+```bash
+watch -n 2 sudo ryzenadj -i
+```
+
+**2. Gerar carga de CPU para teste de consumo:**
+
+Primeiro, instale o pacote `stress`:
+```bash
+sudo apt update
+sudo apt install stress
+```
+
+Depois, execute o comando para estressar a CPU e observar o consumo:
+```bash
+stress --cpu 16 --timeout 60
+```
+> Altere o número de CPUs conforme seu hardware. O comando acima irá estressar 16 núcleos por 60 segundos.
+
+Durante esse período, monitore o consumo de watts usando o comando do ryzenadj acima para verificar como os perfis e limites configurados atuam sob carga.
+
+---
